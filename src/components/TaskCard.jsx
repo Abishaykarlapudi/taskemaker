@@ -1,11 +1,15 @@
 import React from 'react';
 import { BLOOM_LEVELS, TASK_TRACKS } from '../data/bloomTaxonomy';
-import { Check, Edit3, Trash2, GraduationCap, UserCheck, Flame, ArrowUpRight, MessageSquare } from 'lucide-react';
+import { Check, Edit3, Trash2, GraduationCap, UserCheck, Flame, MessageSquare, CheckSquare, Square } from 'lucide-react';
 
-export default function TaskCard({ task, onToggleStatus, onEdit, onDelete, onOpenReflection }) {
+export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit, onDelete, onOpenReflection }) {
   const bloomObj = BLOOM_LEVELS[task.bloomLevel] || BLOOM_LEVELS[1];
   const trackObj = TASK_TRACKS[task.track] || TASK_TRACKS.INSTITUTE;
   const isCompleted = task.status === 'COMPLETED';
+
+  const subTasks = task.subTasks || [];
+  const completedSubTasks = subTasks.filter(s => s.completed);
+  const subTaskProgressPct = subTasks.length > 0 ? (completedSubTasks.length / subTasks.length) * 100 : 0;
 
   return (
     <div 
@@ -18,21 +22,21 @@ export default function TaskCard({ task, onToggleStatus, onEdit, onDelete, onOpe
       }}
     >
       <div className="task-card-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
           <button 
             className={`check-btn ${isCompleted ? 'completed' : ''}`}
             onClick={() => onToggleStatus(task)}
-            title={isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
+            title={isCompleted ? 'Mark Task as Incomplete' : 'Mark Task as Complete'}
           >
             <Check size={16} />
           </button>
           
-          <div>
-            <h3 className={`task-title ${isCompleted ? 'completed' : ''}`}>
+          <div style={{ flex: 1 }}>
+            <h3 className={`task-title ${isCompleted ? 'completed' : ''} preserve-newlines`}>
               {task.title}
             </h3>
             {task.description && (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+              <p className="preserve-newlines" style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.5' }}>
                 {task.description}
               </p>
             )}
@@ -40,7 +44,7 @@ export default function TaskCard({ task, onToggleStatus, onEdit, onDelete, onOpe
         </div>
 
         <div style={{ display: 'flex', gap: '6px' }}>
-          <button className="btn-secondary" style={{ padding: '6px' }} onClick={() => onEdit(task)} title="Edit Task">
+          <button className="btn-secondary" style={{ padding: '6px' }} onClick={() => onEdit(task)} title="Edit Task & Sub-tasks">
             <Edit3 size={15} />
           </button>
           <button className="btn-secondary" style={{ padding: '6px', color: '#f43f5e' }} onClick={() => onDelete(task.id)} title="Delete Task">
@@ -48,6 +52,39 @@ export default function TaskCard({ task, onToggleStatus, onEdit, onDelete, onOpe
           </button>
         </div>
       </div>
+
+      {/* Sub-tasks Section */}
+      {subTasks.length > 0 && (
+        <div style={{ background: 'rgba(0, 0, 0, 0.25)', padding: '12px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)', marginTop: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600', marginBottom: '8px' }}>
+            <span>Sub-tasks Checklist: ({completedSubTasks.length}/{subTasks.length})</span>
+            <span style={{ color: subTaskProgressPct === 100 ? '#10b981' : 'var(--text-muted)' }}>{Math.round(subTaskProgressPct)}%</span>
+          </div>
+
+          <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden', marginBottom: '10px' }}>
+            <div style={{ height: '100%', width: `${subTaskProgressPct}%`, background: '#10b981', transition: 'width 0.3s ease' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {subTasks.map((sub, idx) => (
+              <div 
+                key={sub.id || idx}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem' }}
+                onClick={() => onToggleSubTask(task.id, sub.id || idx)}
+              >
+                {sub.completed ? (
+                  <CheckSquare size={16} color="#10b981" />
+                ) : (
+                  <Square size={16} color="var(--text-subtle)" />
+                )}
+                <span className="preserve-newlines" style={{ textDecoration: sub.completed ? 'line-through' : 'none', color: sub.completed ? 'var(--text-subtle)' : 'var(--text-main)' }}>
+                  {sub.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="task-card-meta">
         {/* Track Badge */}
@@ -90,10 +127,10 @@ export default function TaskCard({ task, onToggleStatus, onEdit, onDelete, onOpe
             borderLeft: '3px solid #10b981'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: '600', marginBottom: '2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: '600', marginBottom: '4px' }}>
             <MessageSquare size={14} /> Reflection Takeaway:
           </div>
-          <p style={{ color: 'var(--text-muted)' }}>
+          <p className="preserve-newlines" style={{ color: 'var(--text-muted)', lineHeight: '1.5' }}>
             "{task.reflections[task.reflections.length - 1].text}"
           </p>
         </div>

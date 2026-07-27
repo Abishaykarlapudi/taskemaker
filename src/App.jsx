@@ -4,9 +4,11 @@ import BloomsPyramid from './components/BloomsPyramid';
 import TaskBoard from './components/TaskBoard';
 import TaskModal from './components/TaskModal';
 import ReflectionModal from './components/ReflectionModal';
+import LoginModal from './components/LoginModal';
 import AnalyticsView from './components/AnalyticsView';
 
-const LOCAL_STORAGE_KEY = 'taskmaker_blooms_tasks_v2'; // Reset storage key for clean slate
+const LOCAL_STORAGE_KEY = 'taskmaker_blooms_tasks_v2';
+const USER_STORAGE_KEY = 'taskmaker_user_v1';
 
 export default function App() {
   const [tasks, setTasks] = useState(() => {
@@ -18,10 +20,22 @@ export default function App() {
     } catch (err) {
       console.error('Error reading localStorage:', err);
     }
-    return []; // Completely blank initial state
+    return [];
   });
 
-  const [activeTrack, setActiveTrack] = useState('ALL'); // ALL, INSTITUTE, PERSONAL
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(USER_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (err) {
+      console.error('Error reading user storage:', err);
+    }
+    return null;
+  });
+
+  const [activeTrack, setActiveTrack] = useState('ALL');
   const [selectedLevelFilter, setSelectedLevelFilter] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -33,6 +47,8 @@ export default function App() {
   const [isReflectionModalOpen, setIsReflectionModalOpen] = useState(false);
   const [reflectingTask, setReflectingTask] = useState(null);
 
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   // Persist tasks to localStorage
   useEffect(() => {
     try {
@@ -42,12 +58,24 @@ export default function App() {
     }
   }, [tasks]);
 
+  // Persist user to localStorage
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(USER_STORAGE_KEY);
+      }
+    } catch (err) {
+      console.error('Error saving user storage:', err);
+    }
+  }, [user]);
+
   // Handler: Toggle Task Status
   const handleToggleStatus = (task) => {
     const isCurrentlyCompleted = task.status === 'COMPLETED';
     
     if (!isCurrentlyCompleted) {
-      // Prompt for reflection upon completion
       setReflectingTask(task);
       setIsReflectionModalOpen(true);
     }
@@ -64,7 +92,32 @@ export default function App() {
     }));
   };
 
-  // Handler: Save Task (Create or Update)
+  // Handler: Toggle Sub-task Checkbox
+  const handleToggleSubTask = (taskId, subTaskId) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        const updatedSubTasks = (t.subTasks || []).map((sub, idx) => {
+          if (sub.id === subTaskId || idx === subTaskId) {
+            return { ...sub, completed: !sub.completed };
+          }
+          return sub;
+        });
+
+        // Check if all subtasks are now completed
+        const allCompleted = updatedSubTasks.length > 0 && updatedSubTasks.every(s => s.completed);
+
+        return { 
+          ...t, 
+          subTasks: updatedSubTasks,
+          status: allCompleted ? 'COMPLETED' : t.status,
+          completedAt: (allCompleted && t.status !== 'COMPLETED') ? new Date().toISOString() : t.completedAt
+        };
+      }
+      return t;
+    }));
+  };
+
+  // Handler: Save Task (Single)
   const handleSaveTask = (taskData) => {
     if (editingTask) {
       setTasks(prev => prev.map(t => t.id === taskData.id ? taskData : t));
@@ -72,6 +125,11 @@ export default function App() {
       setTasks(prev => [taskData, ...prev]);
     }
     setEditingTask(null);
+  };
+
+  // Handler: Save Multi-Level Bloom Tasks (6 Tasks)
+  const handleSaveMultiLevelTasks = (tasksArray) => {
+    setTasks(prev => [...tasksArray, ...prev]);
   };
 
   // Handler: Delete Task
@@ -125,6 +183,9 @@ export default function App() {
     <div className="app-root">
       <Navbar 
         tasks={tasks}
+        user={user}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
+        onLogout={() => setUser(null)}
         activeTrack={activeTrack}
         setActiveTrack={setActiveTrack}
         onOpenNewTask={handleOpenNewTaskWithTrack}
@@ -150,10 +211,13 @@ export default function App() {
           ) : (
             <TaskBoard 
               tasks={tasks}
+              user={user}
+              onOpenLogin={() => setIsLoginModalOpen(true)}
               activeTrack={activeTrack}
               setActiveTrack={setActiveTrack}
               selectedLevelFilter={selectedLevelFilter}
               onToggleStatus={handleToggleStatus}
+              onToggleSubTask={handleToggleSubTask}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
               onOpenReflection={handleOpenReflection}
@@ -171,6 +235,7 @@ export default function App() {
           setEditingTask(null);
         }}
         onSaveTask={handleSaveTask}
+        onSaveMultiLevelTasks={handleSaveMultiLevelTasks}
         editingTask={editingTask}
         initialTrack={modalInitialTrack}
       />
@@ -183,6 +248,12 @@ export default function App() {
         }}
         task={reflectingTask}
         onSaveReflection={handleSaveReflection}
+      />
+
+      <LoginModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLogin={(userData) => setUser(userData)}
       />
     </div>
   );

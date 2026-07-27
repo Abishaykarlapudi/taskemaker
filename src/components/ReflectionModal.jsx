@@ -12,7 +12,6 @@ export default function ReflectionModal({ isOpen, onClose, task, onSaveReflectio
     e.preventDefault();
     if (!reflectionText.trim()) return;
 
-    // Safely attempt confetti animation
     try {
       if (typeof confetti === 'function') {
         confetti({
@@ -41,7 +40,7 @@ export default function ReflectionModal({ isOpen, onClose, task, onSaveReflectio
         <div className="modal-header">
           <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Sparkles size={20} color="#10b981" />
-            Task Completion & Reflection Log
+            Task Completion & Learning Takeaway
           </h2>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
@@ -50,16 +49,16 @@ export default function ReflectionModal({ isOpen, onClose, task, onSaveReflectio
 
         <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)', marginBottom: '16px' }}>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Completing Task:</div>
-          <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '2px' }}>
+          <div className="preserve-newlines" style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '2px' }}>
             {task.title}
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Key Learning Takeaway / Code Snippet / Solution Notes</label>
+            <label className="form-label">Key Learning Takeaway / Code Snippet / Notes (Press Enter for new line)</label>
             <textarea 
-              placeholder="What did you learn? What was the breakthrough solution or concept mastered?"
+              placeholder="What did you learn? Enter code snippets, key solutions, or takeaways... (Supports multiple lines with Enter / Shift+Enter)"
               value={reflectionText}
               onChange={(e) => setReflectionText(e.target.value)}
               className="form-textarea"

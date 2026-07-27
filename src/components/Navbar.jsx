@@ -1,11 +1,21 @@
 import React from 'react';
-import { Brain, Flame, Award, Plus, BarChart3, GraduationCap, UserCheck, Trash2 } from 'lucide-react';
+import { Brain, Flame, Award, BarChart3, GraduationCap, UserCheck, Trash2, User, LogOut, LogIn } from 'lucide-react';
 import { calculateCognitiveScore } from '../data/bloomTaxonomy';
 
-export default function Navbar({ tasks, activeTrack, setActiveTrack, onOpenNewTask, showAnalytics, setShowAnalytics, onClearAllData }) {
+export default function Navbar({ 
+  tasks, 
+  user,
+  onOpenLogin,
+  onLogout,
+  activeTrack, 
+  setActiveTrack, 
+  onOpenNewTask, 
+  showAnalytics, 
+  setShowAnalytics, 
+  onClearAllData 
+}) {
   const cdiScore = calculateCognitiveScore(tasks);
   const completedCount = tasks.filter(t => t.status === 'COMPLETED').length;
-  
   const streak = completedCount > 0 ? 1 : 0;
 
   return (
@@ -15,12 +25,35 @@ export default function Navbar({ tasks, activeTrack, setActiveTrack, onOpenNewTa
           <div className="logo-badge">🧠</div>
           <div>
             <h1 className="logo-title">TaskMaker</h1>
-            <p className="logo-sub">Java Full-Stack & Personal Daily Bloom Engine</p>
+            <p className="logo-sub">Java Full-Stack Bloom Engine</p>
           </div>
         </div>
 
         {/* Stats Pills */}
         <div className="stats-bar">
+          {/* User Badge */}
+          {user ? (
+            <div className="user-pill" title={`Logged in as ${user.name} (${user.course})`}>
+              <User size={14} color="#a5b4fc" />
+              <span>{user.name}</span>
+              <button 
+                onClick={onLogout} 
+                style={{ background: 'transparent', border: 'none', color: '#f43f5e', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', marginLeft: '4px' }}
+                title="Logout / Switch Account"
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '5px 12px', fontSize: '0.8rem' }}
+              onClick={onOpenLogin}
+            >
+              <LogIn size={14} /> Login Student
+            </button>
+          )}
+
           <div className="stat-pill" title="Cognitive Depth Index - Rewards higher-order Bloom tasks">
             <Award size={16} color="#f472b6" />
             <span>CDI: <strong className="stat-pill-score">{cdiScore} pts</strong></span>

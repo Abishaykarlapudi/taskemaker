@@ -50,6 +50,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Preserve line breaks for text descriptions & reflections */
+.preserve-newlines {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -162,6 +168,20 @@ body {
 .stat-pill-score {
   color: #f472b6;
   font-weight: 700;
+}
+
+/* User Badge Pill */
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #a5b4fc;
 }
 
 /* Layout Container */
@@ -513,7 +533,7 @@ body {
 
 .modal-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 620px;
   max-height: 90vh;
   overflow-y: auto;
   background: #111827;
@@ -574,6 +594,11 @@ body {
   font-size: 0.9rem;
   outline: none;
   transition: all 0.2s ease;
+}
+
+.form-textarea {
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .form-input:focus, .form-textarea:focus, .form-select:focus {

@@ -4,10 +4,13 @@ import { Search, GraduationCap, UserCheck, Plus, Sparkles, BookOpen, Brain, Zap 
 
 export default function TaskBoard({ 
   tasks, 
+  user,
+  onOpenLogin,
   activeTrack, 
   setActiveTrack, 
   selectedLevelFilter, 
-  onToggleStatus, 
+  onToggleStatus,
+  onToggleSubTask, 
   onEdit, 
   onDelete, 
   onOpenReflection,
@@ -98,6 +101,7 @@ export default function TaskBoard({
               key={task.id}
               task={task}
               onToggleStatus={onToggleStatus}
+              onToggleSubTask={onToggleSubTask}
               onEdit={onEdit}
               onDelete={onDelete}
               onOpenReflection={onOpenReflection}
@@ -111,7 +115,7 @@ export default function TaskBoard({
           </div>
 
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#ffffff', marginBottom: '8px' }}>
-            Welcome to Your Blank TaskMaker Canvas!
+            {user ? `Welcome ${user.name} to TaskMaker!` : 'Welcome to Your Blank TaskMaker Canvas!'}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '540px', margin: '0 auto 24px auto', lineHeight: '1.6' }}>
             Your task list is completely empty and ready. Start adding your daily <strong>Java Full-Stack Institute Assignments</strong> or <strong>Personal Daily Goals</strong> below.
