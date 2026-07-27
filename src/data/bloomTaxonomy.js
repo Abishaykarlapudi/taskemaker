@@ -10,8 +10,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(99, 102, 241, 0.12)',
     border: 'rgba(99, 102, 241, 0.3)',
     weight: 1,
-    icon: 'Brain',
-    upgradeSuggestion: 'Convert into an "Understand" task by explaining this concept in your own words or diagramming it.'
+    icon: 'Brain'
   },
   2: {
     id: 2,
@@ -24,8 +23,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(6, 182, 212, 0.12)',
     border: 'rgba(6, 182, 212, 0.3)',
     weight: 2,
-    icon: 'Lightbulb',
-    upgradeSuggestion: 'Convert into an "Apply" task by writing code to demonstrate this concept in Java/React.'
+    icon: 'Lightbulb'
   },
   3: {
     id: 3,
@@ -38,8 +36,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(16, 185, 129, 0.12)',
     border: 'rgba(16, 185, 129, 0.3)',
     weight: 3,
-    icon: 'Zap',
-    upgradeSuggestion: 'Convert into an "Analyze" task by profiling performance or debugging edge cases.'
+    icon: 'Zap'
   },
   4: {
     id: 4,
@@ -52,8 +49,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(245, 158, 11, 0.12)',
     border: 'rgba(245, 158, 11, 0.3)',
     weight: 4,
-    icon: 'Search',
-    upgradeSuggestion: 'Convert into an "Evaluate" task by writing a code review or benchmarking architectural alternatives.'
+    icon: 'Search'
   },
   5: {
     id: 5,
@@ -66,8 +62,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(249, 115, 22, 0.12)',
     border: 'rgba(249, 115, 22, 0.3)',
     weight: 5,
-    icon: 'Scale',
-    upgradeSuggestion: 'Convert into a "Create" task by designing a reusable template or custom framework solution.'
+    icon: 'Scale'
   },
   6: {
     id: 6,
@@ -80,8 +75,7 @@ export const BLOOM_LEVELS = {
     lightBg: 'rgba(236, 72, 153, 0.12)',
     border: 'rgba(236, 72, 153, 0.3)',
     weight: 6,
-    icon: 'Sparkles',
-    upgradeSuggestion: 'You are at the highest cognitive level! Focus on polishing and sharing your creation on GitHub.'
+    icon: 'Sparkles'
   }
 };
 
@@ -91,14 +85,14 @@ export const TASK_TRACKS = {
     label: 'Institute Course Assignment',
     badgeColor: '#3b82f6',
     icon: 'GraduationCap',
-    description: 'Tasks assigned by your Java Full-Stack institute'
+    description: 'Tasks assigned by your Java Full-Stack institute (Bloom Taxonomy)'
   },
   PERSONAL: {
     id: 'PERSONAL',
     label: 'Personal Daily Goal',
     badgeColor: '#a855f7',
     icon: 'UserCheck',
-    description: 'Self-study, personal habits, DSA practice & projects'
+    description: 'Personal tasks & habits (Simple Task)'
   }
 };
 
@@ -118,11 +112,12 @@ export const JAVA_FULLSTACK_SUGGESTIONS = [
 ];
 
 export function calculateCognitiveScore(tasks) {
-  const completedTasks = tasks.filter(t => t.status === 'COMPLETED');
-  if (completedTasks.length === 0) return 0;
+  // Only Institute tasks have Bloom Taxonomy levels
+  const completedInstituteTasks = tasks.filter(t => t.track === 'INSTITUTE' && t.status === 'COMPLETED' && t.bloomLevel > 0);
+  if (completedInstituteTasks.length === 0) return 0;
   
   let totalWeightedScore = 0;
-  completedTasks.forEach(task => {
+  completedInstituteTasks.forEach(task => {
     const levelObj = BLOOM_LEVELS[task.bloomLevel] || BLOOM_LEVELS[1];
     const painMultiplier = task.painRating ? (1 + task.painRating * 0.1) : 1;
     totalWeightedScore += levelObj.weight * 10 * painMultiplier;

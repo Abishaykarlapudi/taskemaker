@@ -3,7 +3,8 @@ import { BLOOM_LEVELS, TASK_TRACKS } from '../data/bloomTaxonomy';
 import { Check, Edit3, Trash2, GraduationCap, UserCheck, Flame, MessageSquare, CheckSquare, Square } from 'lucide-react';
 
 export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit, onDelete, onOpenReflection }) {
-  const bloomObj = BLOOM_LEVELS[task.bloomLevel] || BLOOM_LEVELS[1];
+  const isInstitute = task.track === 'INSTITUTE' && task.bloomLevel > 0;
+  const bloomObj = isInstitute ? (BLOOM_LEVELS[task.bloomLevel] || BLOOM_LEVELS[1]) : null;
   const trackObj = TASK_TRACKS[task.track] || TASK_TRACKS.INSTITUTE;
   const isCompleted = task.status === 'COMPLETED';
 
@@ -15,9 +16,9 @@ export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit
     <div 
       className="glass-panel task-card"
       style={{
-        '--bloom-color': bloomObj.color,
-        '--bloom-light': bloomObj.lightBg,
-        '--bloom-border': bloomObj.border,
+        '--bloom-color': isInstitute ? bloomObj.color : '#a855f7',
+        '--bloom-light': isInstitute ? bloomObj.lightBg : 'rgba(168, 85, 247, 0.12)',
+        '--bloom-border': isInstitute ? bloomObj.border : 'rgba(168, 85, 247, 0.3)',
         opacity: isCompleted ? 0.75 : 1
       }}
     >
@@ -93,18 +94,23 @@ export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit
           {trackObj.label}
         </span>
 
-        {/* Bloom Level Badge */}
-        <span className="badge badge-bloom">
-          L{bloomObj.id}: {bloomObj.name}
-        </span>
+        {/* Bloom Level Badge ONLY for Institute Tasks */}
+        {isInstitute && (
+          <>
+            <span className="badge badge-bloom">
+              L{bloomObj.id}: {bloomObj.name}
+            </span>
 
-        {/* Action Verb */}
-        <span className="badge badge-verb">
-          Verb: {task.verb || bloomObj.verbs[0]}
-        </span>
+            {task.verb && (
+              <span className="badge badge-verb">
+                Verb: {task.verb}
+              </span>
+            )}
+          </>
+        )}
 
         {/* Pain Rating Meter */}
-        <div className="pain-meter" title={`Task Difficulty Pain Rating: ${task.painRating}/5`}>
+        <div className="pain-meter" title={`Task Difficulty Effort Rating: ${task.painRating}/5`}>
           <Flame size={13} color={task.painRating > 3 ? '#f43f5e' : '#f59e0b'} />
           <span>Pain:</span>
           {[1, 2, 3, 4, 5].map((level) => (

@@ -21,8 +21,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
       setTitle(editingTask.title || '');
       setDescription(editingTask.description || '');
       setTrack(editingTask.track || 'INSTITUTE');
-      setBloomLevel(editingTask.bloomLevel || 3);
-      setVerb(editingTask.verb || 'Implement');
+      setBloomLevel(editingTask.bloomLevel || (editingTask.track === 'PERSONAL' ? 0 : 3));
+      setVerb(editingTask.verb || '');
       setPainRating(editingTask.painRating || 3);
       setPriority(editingTask.priority || 'HIGH');
       setSubTasks(editingTask.subTasks || []);
@@ -31,14 +31,28 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
       setTitle('');
       setDescription('');
       setTrack(initialTrack || 'INSTITUTE');
-      setBloomLevel(3);
-      setVerb('Implement');
+      setBloomLevel(initialTrack === 'PERSONAL' ? 0 : 3);
+      setVerb(initialTrack === 'PERSONAL' ? '' : 'Implement');
       setPainRating(3);
       setPriority('HIGH');
       setSubTasks([]);
       setEnrollAllLevels(initialTrack === 'INSTITUTE');
     }
   }, [editingTask, isOpen, initialTrack]);
+
+  // When track switches to PERSONAL, reset bloomLevel to 0
+  const handleTrackSwitch = (newTrack) => {
+    setTrack(newTrack);
+    if (newTrack === 'PERSONAL') {
+      setBloomLevel(0);
+      setVerb('');
+      setEnrollAllLevels(false);
+    } else {
+      setBloomLevel(3);
+      setVerb('Implement');
+      setEnrollAllLevels(true);
+    }
+  };
 
   const handleLevelChange = (levelId) => {
     setBloomLevel(levelId);
@@ -185,8 +199,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
         title: title.trim(),
         description: description.trim(),
         track,
-        bloomLevel: Number(bloomLevel),
-        verb,
+        bloomLevel: track === 'PERSONAL' ? 0 : Number(bloomLevel),
+        verb: track === 'PERSONAL' ? '' : verb,
         painRating: Number(painRating),
         priority,
         status: editingTask ? editingTask.status : 'TODO',
@@ -209,7 +223,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
         <div className="modal-header">
           <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {track === 'INSTITUTE' ? <GraduationCap color="#60a5fa" size={22} /> : <UserCheck color="#c084fc" size={22} />}
-            {editingTask ? 'Edit Task & Sub-tasks' : (track === 'INSTITUTE' ? 'Add Institute Assignment' : 'Add Personal Daily Goal')}
+            {editingTask ? 'Edit Task' : (track === 'INSTITUTE' ? 'Add Institute Assignment (Bloom Taxonomy)' : 'Add Personal Daily Goal')}
           </h2>
           <button className="close-btn" onClick={onClose}>
             <X size={20} />
@@ -234,9 +248,41 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           <Info size={16} color={track === 'INSTITUTE' ? '#60a5fa' : '#c084fc'} />
           <span>
             {track === 'INSTITUTE' 
-              ? 'Enter the assignment topic given by your Java institute. It can automatically generate tasks with sub-tasks for all 6 Bloom levels!'
-              : 'Enter your personal self-study topic, LeetCode problem, or daily habit goal.'}
+              ? 'Institute assignments use Bloom\'s Taxonomy (6 levels of cognitive mastery).'
+              : 'Personal daily goals do not require Bloom\'s Taxonomy. Add your task, notes & sub-tasks checklist.'}
           </span>
+        </div>
+
+        {/* Category Track Switcher */}
+        <div className="form-group">
+          <label className="form-label">Category Track</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <button
+              type="button"
+              className={`btn-secondary ${track === 'INSTITUTE' ? 'active' : ''}`}
+              style={{
+                borderColor: track === 'INSTITUTE' ? '#3b82f6' : 'var(--glass-border)',
+                background: track === 'INSTITUTE' ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                color: track === 'INSTITUTE' ? '#60a5fa' : 'var(--text-muted)'
+              }}
+              onClick={() => handleTrackSwitch('INSTITUTE')}
+            >
+              <GraduationCap size={16} /> Institute Assignment
+            </button>
+
+            <button
+              type="button"
+              className={`btn-secondary ${track === 'PERSONAL' ? 'active' : ''}`}
+              style={{
+                borderColor: track === 'PERSONAL' ? '#a855f7' : 'var(--glass-border)',
+                background: track === 'PERSONAL' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                color: track === 'PERSONAL' ? '#c084fc' : 'var(--text-muted)'
+              }}
+              onClick={() => handleTrackSwitch('PERSONAL')}
+            >
+              <UserCheck size={16} /> Personal Daily Goal
+            </button>
+          </div>
         </div>
 
         {/* Multi-Level Bloom Enrollment Checkbox for Institute Tasks */}
@@ -261,7 +307,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
                   Enroll across ALL 6 Bloom's Taxonomy Levels
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
-                  Generates 6 progressive stages (Recall $\rightarrow$ Explain $\rightarrow$ Implement $\rightarrow$ Debug $\rightarrow$ Critique $\rightarrow$ Architect) with sub-tasks
+                  Generates 6 progressive stages (Recall $\rightarrow$ Explain $\rightarrow$ Implement $\rightarrow$ Debug $\rightarrow$ Critique $\rightarrow$ Architect)
                 </div>
               </div>
             </div>
@@ -274,45 +320,47 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          {/* Category Track Switcher */}
-          <div className="form-group">
-            <label className="form-label">Category Track</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <button
-                type="button"
-                className={`btn-secondary ${track === 'INSTITUTE' ? 'active' : ''}`}
-                style={{
-                  borderColor: track === 'INSTITUTE' ? '#3b82f6' : 'var(--glass-border)',
-                  background: track === 'INSTITUTE' ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                  color: track === 'INSTITUTE' ? '#60a5fa' : 'var(--text-muted)'
-                }}
-                onClick={() => setTrack('INSTITUTE')}
-              >
-                <GraduationCap size={16} /> Institute Assignment
-              </button>
-
-              <button
-                type="button"
-                className={`btn-secondary ${track === 'PERSONAL' ? 'active' : ''}`}
-                style={{
-                  borderColor: track === 'PERSONAL' ? '#a855f7' : 'var(--glass-border)',
-                  background: track === 'PERSONAL' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
-                  color: track === 'PERSONAL' ? '#c084fc' : 'var(--text-muted)'
-                }}
-                onClick={() => setTrack('PERSONAL')}
-              >
-                <UserCheck size={16} /> Personal Goal
-              </button>
+        {/* Quick Presets for Institute Tasks */}
+        {!editingTask && track === 'INSTITUTE' && (
+          <div style={{ marginBottom: '16px', background: 'rgba(255, 255, 255, 0.03)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
+            <div style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={14} /> Quick Java Full-Stack Topic Ideas:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {JAVA_FULLSTACK_SUGGESTIONS.slice(0, 5).map((sug, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleSelectPreset(sug)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid var(--glass-border)',
+                    color: 'var(--text-muted)',
+                    borderRadius: 'var(--radius-pill)',
+                    padding: '3px 10px',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>L{sug.levelId}:</span> {sug.title.slice(0, 30)}...
+                </button>
+              ))}
             </div>
           </div>
+        )}
 
+        <form onSubmit={handleSubmit}>
           {/* Title */}
           <div className="form-group">
-            <label className="form-label">Assignment / Topic Title</label>
+            <label className="form-label">
+              {track === 'INSTITUTE' ? 'Institute Assignment / Topic Title' : 'Personal Goal Title'}
+            </label>
             <input 
               type="text" 
-              placeholder={track === 'INSTITUTE' ? 'e.g. Spring Boot REST API & Hibernate Entity Mapping' : 'e.g. Solve 2 LeetCode Medium Array questions'}
+              placeholder={track === 'INSTITUTE' ? 'e.g. Spring Boot REST API & Hibernate Entity Mapping' : 'e.g. Solve 2 LeetCode Array questions & go for a 30-min run'}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="form-input"
@@ -322,9 +370,9 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
 
           {/* Description */}
           <div className="form-group">
-            <label className="form-label">Task Instructions / Requirements (Supports Enter for new lines)</label>
+            <label className="form-label">Task Instructions / Notes (Supports Enter for new lines)</label>
             <textarea 
-              placeholder="Enter instructions, notes, or homework steps given by trainer... (Supports multiple lines)"
+              placeholder="Enter instructions, notes, or details... (Supports multiple lines with Enter / Shift+Enter)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="form-textarea"
@@ -342,7 +390,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
               <input 
                 type="text"
-                placeholder="e.g. Write Controller code / Test endpoint"
+                placeholder="e.g. Practice Array hashmap problem / Drink 2L water"
                 value={newSubTaskTitle}
                 onChange={(e) => setNewSubTaskTitle(e.target.value)}
                 onKeyDown={(e) => {
@@ -382,8 +430,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
             )}
           </div>
 
-          {/* Single Level Options (only if not enrolling all 6 levels) */}
-          {(!enrollAllLevels || track !== 'INSTITUTE' || editingTask) && (
+          {/* Bloom's Level & Verbs ONLY for Institute Tasks */}
+          {track === 'INSTITUTE' && (!enrollAllLevels || editingTask) && (
             <>
               <div className="form-group">
                 <label className="form-label">Bloom's Taxonomy Cognitive Level</label>
@@ -473,7 +521,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
               Cancel
             </button>
             <button type="submit" className="btn-primary">
-              {editingTask ? 'Update Task & Sub-tasks' : (enrollAllLevels && track === 'INSTITUTE' ? 'Enroll 6 Bloom Levels' : 'Save Task')}
+              {editingTask ? 'Update Task' : (track === 'INSTITUTE' && enrollAllLevels ? 'Enroll 6 Bloom Levels' : 'Save Personal Task')}
             </button>
           </div>
         </form>
