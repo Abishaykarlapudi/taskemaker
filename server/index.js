@@ -8,7 +8,7 @@ import { existsSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rocksun:Test12345@job-portal.r8efxop.mongodb.net/edugig?retryWrites=true&w=majority&appName=job-portal';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rocksun:Test12345@job-portal.r8efxop.mongodb.net/taskmaker?retryWrites=true&w=majority&appName=taskmaker';
 
 // ─── MongoDB User Schema ───────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema({
