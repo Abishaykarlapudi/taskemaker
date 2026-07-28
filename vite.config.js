@@ -7,7 +7,15 @@ export default defineConfig({
   server: {
     port: 4001,
     host: true,
-    open: false
+    open: false,
+    proxy: {
+      // Proxy all /api requests to the Express backend
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   preview: {
     port: 4001,
