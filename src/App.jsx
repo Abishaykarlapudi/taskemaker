@@ -39,6 +39,9 @@ export default function App() {
   const [selectedLevelFilter, setSelectedLevelFilter] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
+  // Multi-select state
+  const [selectedTaskIds, setSelectedTaskIds] = useState(new Set());
+
   // Modal States
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -71,10 +74,60 @@ export default function App() {
     }
   }, [user]);
 
-  // Handler: Toggle Task Status
+  // Handler: Toggle single task select checkbox
+  const handleToggleSelectTask = (taskId) => {
+    setSelectedTaskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  };
+
+  // Handler: Select All visible tasks
+  const handleSelectAll = (visibleTaskIds) => {
+    setSelectedTaskIds(new Set(visibleTaskIds));
+  };
+
+  // Handler: Clear all selections
+  const handleClearSelection = () => {
+    setSelectedTaskIds(new Set());
+  };
+
+  // Handler: Bulk mark selected tasks COMPLETED
+  const handleBulkMarkComplete = () => {
+    setTasks(prev => prev.map(t => {
+      if (selectedTaskIds.has(t.id) && t.status !== 'COMPLETED') {
+        return { ...t, status: 'COMPLETED', completedAt: new Date().toISOString() };
+      }
+      return t;
+    }));
+    setSelectedTaskIds(new Set());
+  };
+
+  // Handler: Bulk mark selected tasks INCOMPLETE (uncheck)
+  const handleBulkMarkIncomplete = () => {
+    setTasks(prev => prev.map(t => {
+      if (selectedTaskIds.has(t.id)) {
+        return { ...t, status: 'TODO', completedAt: null };
+      }
+      return t;
+    }));
+    setSelectedTaskIds(new Set());
+  };
+
+  // Handler: Bulk delete selected tasks
+  const handleBulkDelete = () => {
+    if (window.confirm(`Delete ${selectedTaskIds.size} selected task(s)? This cannot be undone.`)) {
+      setTasks(prev => prev.filter(t => !selectedTaskIds.has(t.id)));
+      setSelectedTaskIds(new Set());
+    }
+  };
+
+  // Handler: Toggle Task Status (single)
   const handleToggleStatus = (task) => {
     const isCurrentlyCompleted = task.status === 'COMPLETED';
-    
+
     if (!isCurrentlyCompleted) {
       setReflectingTask(task);
       setIsReflectionModalOpen(true);
@@ -222,6 +275,13 @@ export default function App() {
               onDelete={handleDeleteTask}
               onOpenReflection={handleOpenReflection}
               onOpenNewTask={handleOpenNewTaskWithTrack}
+              selectedTaskIds={selectedTaskIds}
+              onToggleSelectTask={handleToggleSelectTask}
+              onSelectAll={handleSelectAll}
+              onClearSelection={handleClearSelection}
+              onBulkMarkComplete={handleBulkMarkComplete}
+              onBulkMarkIncomplete={handleBulkMarkIncomplete}
+              onBulkDelete={handleBulkDelete}
             />
           )}
         </section>

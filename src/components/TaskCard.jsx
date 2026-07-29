@@ -2,7 +2,7 @@ import React from 'react';
 import { BLOOM_LEVELS, TASK_TRACKS } from '../data/bloomTaxonomy';
 import { Check, Edit3, Trash2, GraduationCap, UserCheck, Flame, MessageSquare, CheckSquare, Square } from 'lucide-react';
 
-export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit, onDelete, onOpenReflection }) {
+export default function TaskCard({ task, isSelected, onToggleSelect, onToggleStatus, onToggleSubTask, onEdit, onDelete, onOpenReflection }) {
   const isInstitute = task.track === 'INSTITUTE' && task.bloomLevel > 0;
   const bloomObj = isInstitute ? (BLOOM_LEVELS[task.bloomLevel] || BLOOM_LEVELS[1]) : null;
   const trackObj = TASK_TRACKS[task.track] || TASK_TRACKS.INSTITUTE;
@@ -19,11 +19,33 @@ export default function TaskCard({ task, onToggleStatus, onToggleSubTask, onEdit
         '--bloom-color': isInstitute ? bloomObj.color : '#a855f7',
         '--bloom-light': isInstitute ? bloomObj.lightBg : 'rgba(168, 85, 247, 0.12)',
         '--bloom-border': isInstitute ? bloomObj.border : 'rgba(168, 85, 247, 0.3)',
-        opacity: isCompleted ? 0.75 : 1
+        opacity: isCompleted ? 0.75 : 1,
+        outline: isSelected ? '2px solid #6366f1' : 'none',
+        outlineOffset: '2px',
+        transition: 'outline 0.15s ease'
       }}
     >
       <div className="task-card-header">
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
+          {/* Multi-select checkbox */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleSelect(task.id); }}
+            title={isSelected ? 'Deselect task' : 'Select task'}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '2px',
+              color: isSelected ? '#6366f1' : 'var(--text-subtle)',
+              flexShrink: 0,
+              marginTop: '1px',
+              transition: 'color 0.15s'
+            }}
+          >
+            {isSelected ? <CheckSquare size={17} color="#6366f1" /> : <Square size={17} />}
+          </button>
+
+          {/* Complete checkbox */}
           <button 
             className={`check-btn ${isCompleted ? 'completed' : ''}`}
             onClick={() => onToggleStatus(task)}

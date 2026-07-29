@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TaskCard from './TaskCard';
-import { Search, GraduationCap, UserCheck, Plus, Sparkles, BookOpen, Brain, Zap } from 'lucide-react';
+import { Search, GraduationCap, UserCheck, Plus, CheckSquare, Square, Trash2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
 export default function TaskBoard({ 
   tasks, 
@@ -14,7 +14,15 @@ export default function TaskBoard({
   onEdit, 
   onDelete, 
   onOpenReflection,
-  onOpenNewTask
+  onOpenNewTask,
+  // Multi-select props
+  selectedTaskIds,
+  onToggleSelectTask,
+  onSelectAll,
+  onClearSelection,
+  onBulkMarkComplete,
+  onBulkMarkIncomplete,
+  onBulkDelete
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -36,6 +44,23 @@ export default function TaskBoard({
 
     return true;
   });
+
+  const filteredIds = filteredTasks.map(t => t.id);
+  const allVisibleSelected = filteredIds.length > 0 && filteredIds.every(id => selectedTaskIds.has(id));
+  const someSelected = selectedTaskIds.size > 0;
+
+  // How many of the selection are completed vs incomplete
+  const selectedTasks = tasks.filter(t => selectedTaskIds.has(t.id));
+  const selectedCompleted = selectedTasks.filter(t => t.status === 'COMPLETED').length;
+  const selectedIncomplete = selectedTasks.filter(t => t.status !== 'COMPLETED').length;
+
+  const handleToggleSelectAll = () => {
+    if (allVisibleSelected) {
+      onClearSelection();
+    } else {
+      onSelectAll(filteredIds);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -93,6 +118,149 @@ export default function TaskBoard({
         </div>
       </div>
 
+      {/* ── Bulk Action Bar (appears when tasks exist) ── */}
+      {filteredTasks.length > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '10px 16px',
+          background: someSelected
+            ? 'rgba(99, 102, 241, 0.12)'
+            : 'rgba(255,255,255,0.03)',
+          border: someSelected
+            ? '1px solid rgba(99, 102, 241, 0.35)'
+            : '1px solid var(--glass-border)',
+          borderRadius: 'var(--radius-sm)',
+          transition: 'all 0.2s ease',
+          flexWrap: 'wrap'
+        }}>
+          {/* Select All / Deselect All Checkbox */}
+          <button
+            onClick={handleToggleSelectAll}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: allVisibleSelected ? '#6366f1' : 'var(--text-muted)',
+              fontSize: '0.84rem',
+              fontWeight: '600',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              transition: 'background 0.15s'
+            }}
+            title={allVisibleSelected ? 'Deselect All' : 'Select All Visible'}
+          >
+            {allVisibleSelected
+              ? <CheckSquare size={17} color="#6366f1" />
+              : <Square size={17} />
+            }
+            {allVisibleSelected ? 'Deselect All' : 'Select All'}
+          </button>
+
+          {/* Count label */}
+          {someSelected && (
+            <span style={{ fontSize: '0.82rem', color: '#a5b4fc', fontWeight: '600' }}>
+              {selectedTaskIds.size} selected
+            </span>
+          )}
+
+          {/* Divider */}
+          {someSelected && <div style={{ width: '1px', height: '22px', background: 'rgba(255,255,255,0.1)' }} />}
+
+          {/* Bulk action buttons — only when items selected */}
+          {someSelected && (
+            <>
+              {/* Mark Complete */}
+              {selectedIncomplete > 0 && (
+                <button
+                  onClick={onBulkMarkComplete}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    color: '#6ee7b7',
+                    borderRadius: '8px',
+                    padding: '5px 12px',
+                    fontSize: '0.82rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                  title="Mark selected tasks as complete"
+                >
+                  <CheckCircle2 size={15} /> Mark Complete ({selectedIncomplete})
+                </button>
+              )}
+
+              {/* Mark Incomplete (Uncheck) */}
+              {selectedCompleted > 0 && (
+                <button
+                  onClick={onBulkMarkIncomplete}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    color: '#fcd34d',
+                    borderRadius: '8px',
+                    padding: '5px 12px',
+                    fontSize: '0.82rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                  title="Uncheck / mark selected tasks as incomplete"
+                >
+                  <RotateCcw size={15} /> Uncheck ({selectedCompleted})
+                </button>
+              )}
+
+              {/* Bulk Delete */}
+              <button
+                onClick={onBulkDelete}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  background: 'rgba(244, 63, 94, 0.12)',
+                  border: '1px solid rgba(244, 63, 94, 0.35)',
+                  color: '#fda4af',
+                  borderRadius: '8px',
+                  padding: '5px 12px',
+                  fontSize: '0.82rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s'
+                }}
+                title="Delete all selected tasks"
+              >
+                <Trash2 size={15} /> Delete ({selectedTaskIds.size})
+              </button>
+
+              {/* Clear Selection */}
+              <button
+                onClick={onClearSelection}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-subtle)',
+                  borderRadius: '8px',
+                  padding: '5px 10px',
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  marginLeft: 'auto'
+                }}
+                title="Clear selection"
+              >
+                <XCircle size={15} /> Clear
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Task List or Welcome Hero */}
       {filteredTasks.length > 0 ? (
         <div className="task-grid">
@@ -100,6 +268,8 @@ export default function TaskBoard({
             <TaskCard 
               key={task.id}
               task={task}
+              isSelected={selectedTaskIds.has(task.id)}
+              onToggleSelect={onToggleSelectTask}
               onToggleStatus={onToggleStatus}
               onToggleSubTask={onToggleSubTask}
               onEdit={onEdit}
@@ -110,7 +280,7 @@ export default function TaskBoard({
         </div>
       ) : (
         <div className="glass-panel" style={{ padding: '36px 28px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, rgba(18, 24, 38, 0.8) 100%)' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', display: 'inline-flex', alignItems: 'center', justifyCenter: 'center', fontSize: '32px', marginBottom: '16px', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)' }}>
             🧠
           </div>
 
