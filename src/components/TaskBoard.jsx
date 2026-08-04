@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import TaskCard from './TaskCard';
 import { Search, GraduationCap, UserCheck, Plus, CheckSquare, Square, Trash2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
+
 export default function TaskBoard({ 
   tasks, 
   user,
@@ -116,6 +117,38 @@ export default function TaskBoard({
             <option value="COMPLETED">Completed</option>
           </select>
         </div>
+      </div>
+
+      {/* ── Context-aware Add Task Button ── */}
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {(activeTrack === 'ALL' || activeTrack === 'INSTITUTE') && (
+          <button
+            className="btn-primary"
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              boxShadow: '0 4px 14px rgba(59,130,246,0.35)',
+              padding: '9px 18px',
+              fontSize: '0.88rem'
+            }}
+            onClick={() => onOpenNewTask('INSTITUTE')}
+          >
+            <GraduationCap size={16} /> + Add Institute Task
+          </button>
+        )}
+        {(activeTrack === 'ALL' || activeTrack === 'PERSONAL') && (
+          <button
+            className="btn-primary"
+            style={{
+              background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
+              boxShadow: '0 4px 14px rgba(168,85,247,0.35)',
+              padding: '9px 18px',
+              fontSize: '0.88rem'
+            }}
+            onClick={() => onOpenNewTask('PERSONAL')}
+          >
+            <UserCheck size={16} /> + Add Personal Task
+          </button>
+        )}
       </div>
 
       {/* ── Bulk Action Bar (appears when tasks exist) ── */}
