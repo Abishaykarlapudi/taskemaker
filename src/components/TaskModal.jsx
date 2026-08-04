@@ -112,123 +112,36 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
     }
 
     if (!editingTask && track === 'INSTITUTE' && enrollAllLevels) {
-      // Capture user-typed subtasks to append into each Bloom level
-      const userSubTasks = finalSubTasks;
+      const now = Date.now();
       const baseTitle = title.trim();
       const baseDesc = description.trim();
 
-      const bloomTasks = [
-        {
-          id: `task-${Date.now()}-1`,
-          title: `[L1 Remember] Recall Syntax & Concepts: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Memorize syntax, annotations, rules, and HTTP/DB codes.` : 'Task Focus: Memorize syntax, annotations, rules, and HTTP/DB codes.',
-          track: 'INSTITUTE',
-          bloomLevel: 1,
-          verb: 'Recall',
-          painRating: 2,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-1a`, title: 'Review lecture notes & syntax rules', completed: false },
-            { id: `sub-${Date.now()}-1b`, title: 'Memorize core annotations & HTTP status codes', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L1-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date(Date.now() - 5000).toISOString()
-        },
-        {
-          id: `task-${Date.now()}-2`,
-          title: `[L2 Understand] Explain Architecture & Flow: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Summarize concepts, draw memory diagrams, explain execution flow.` : 'Task Focus: Summarize concepts, draw memory diagrams, explain execution flow.',
-          track: 'INSTITUTE',
-          bloomLevel: 2,
-          verb: 'Explain',
-          painRating: 2,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-2a`, title: 'Sketch component execution / request flow diagram', completed: false },
-            { id: `sub-${Date.now()}-2b`, title: 'Summarize core OOP / JVM concepts in notes', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L2-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date(Date.now() - 4000).toISOString()
-        },
-        {
-          id: `task-${Date.now()}-3`,
-          title: `[L3 Apply] Implement Working Code & Solution: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Write working code, build REST API/UI component, execute unit tests.` : 'Task Focus: Write working code, build REST API/UI component, execute unit tests.',
-          track: 'INSTITUTE',
-          bloomLevel: 3,
-          verb: 'Implement',
-          painRating: 3,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-3a`, title: 'Write Java / Spring Boot / React code implementation', completed: false },
-            { id: `sub-${Date.now()}-3b`, title: 'Execute & test API endpoint with Postman', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L3-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date(Date.now() - 3000).toISOString()
-        },
-        {
-          id: `task-${Date.now()}-4`,
-          title: `[L4 Analyze] Debug Exceptions & Profile Performance: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Troubleshoot NullPointer/CORS errors, dissect stack trace, inspect query plans.` : 'Task Focus: Troubleshoot NullPointer/CORS errors, dissect stack trace, inspect query plans.',
-          track: 'INSTITUTE',
-          bloomLevel: 4,
-          verb: 'Debug',
-          painRating: 4,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-4a`, title: 'Inspect stack trace & resolve edge cases / null errors', completed: false },
-            { id: `sub-${Date.now()}-4b`, title: 'Profile SQL query execution & performance', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L4-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date(Date.now() - 2000).toISOString()
-        },
-        {
-          id: `task-${Date.now()}-5`,
-          title: `[L5 Evaluate] Code Review & Benchmark Security: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Audit code quality, evaluate SOLID principles, benchmark performance trade-offs.` : 'Task Focus: Audit code quality, evaluate SOLID principles, benchmark performance trade-offs.',
-          track: 'INSTITUTE',
-          bloomLevel: 5,
-          verb: 'Critique',
-          painRating: 4,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-5a`, title: 'Review code against SOLID principles & clean code rules', completed: false },
-            { id: `sub-${Date.now()}-5b`, title: 'Benchmark security & data validation', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L5-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date(Date.now() - 1000).toISOString()
-        },
-        {
-          id: `task-${Date.now()}-6`,
-          title: `[L6 Create] Design & Architect Custom Capstone Feature: ${baseTitle}`,
-          description: baseDesc ? `${baseDesc}\n\n• Task Focus: Build full-stack microservice feature, author documentation, publish code.` : 'Task Focus: Build full-stack microservice feature, author documentation, publish code.',
-          track: 'INSTITUTE',
-          bloomLevel: 6,
-          verb: 'Design',
-          painRating: 5,
-          priority: 'HIGH',
-          status: 'TODO',
-          subTasks: [
-            { id: `sub-${Date.now()}-6a`, title: 'Architect full-stack feature component & microservice API', completed: false },
-            { id: `sub-${Date.now()}-6b`, title: 'Publish project repository to GitHub', completed: false },
-            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L6-${Date.now()}-${i}`, completed: false }))
-          ],
-          reflections: [],
-          createdAt: new Date().toISOString()
-        }
+      // Build the 6 Bloom levels as sub-tasks of ONE single task
+      const bloomSubTasks = [
+        { id: `sub-bloom-${now}-1`, title: '🧠 L1 Remember — Recall syntax, annotations, HTTP codes & rules', completed: false },
+        { id: `sub-bloom-${now}-2`, title: '💡 L2 Understand — Explain architecture, execution flow & OOP concepts', completed: false },
+        { id: `sub-bloom-${now}-3`, title: '⚡ L3 Apply — Implement working code, REST API / UI component & unit tests', completed: false },
+        { id: `sub-bloom-${now}-4`, title: '🔍 L4 Analyze — Debug exceptions, profile SQL & inspect stack trace', completed: false },
+        { id: `sub-bloom-${now}-5`, title: '⚖️ L5 Evaluate — Code review, SOLID audit & benchmark security', completed: false },
+        { id: `sub-bloom-${now}-6`, title: '🎨 L6 Create — Architect full-stack feature & publish to GitHub', completed: false },
+        // Append any custom sub-tasks the user typed
+        ...finalSubTasks.map((s, i) => ({ ...s, id: `sub-custom-${now}-${i}`, completed: false }))
       ];
 
-      onSaveMultiLevelTasks(bloomTasks);
+      onSaveTask({
+        id: `task-${now}`,
+        title: baseTitle,
+        description: baseDesc,
+        track: 'INSTITUTE',
+        bloomLevel: 3,
+        verb: 'Implement',
+        painRating: Number(painRating),
+        priority,
+        status: 'TODO',
+        subTasks: bloomSubTasks,
+        reflections: [],
+        createdAt: new Date().toISOString()
+      });
     } else {
       onSaveTask({
         id: editingTask ? editingTask.id : `task-${Date.now()}`,
@@ -599,7 +512,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
               Cancel
             </button>
             <button type="submit" className="btn-primary">
-              {editingTask ? 'Update Task' : (track === 'INSTITUTE' && enrollAllLevels ? 'Enroll 6 Bloom Levels' : 'Save Personal Task')}
+              {editingTask ? 'Update Task' : (track === 'INSTITUTE' && enrollAllLevels ? '🎓 Save Task with 6 Bloom Sub-tasks' : track === 'INSTITUTE' ? 'Save Institute Task' : 'Save Personal Task')}
             </button>
           </div>
         </form>
