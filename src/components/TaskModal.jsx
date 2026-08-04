@@ -15,6 +15,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
   // Sub-tasks state
   const [subTasks, setSubTasks] = useState([]);
   const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
+  const [editingSubTaskId, setEditingSubTaskId] = useState(null);
+  const [editingSubTaskTitle, setEditingSubTaskTitle] = useState('');
 
   useEffect(() => {
     if (editingTask) {
@@ -79,13 +81,39 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
     setSubTasks(prev => prev.filter(s => s.id !== id));
   };
 
+  const handleStartEditSubTask = (sub) => {
+    setEditingSubTaskId(sub.id);
+    setEditingSubTaskTitle(sub.title);
+  };
+
+  const handleSaveSubTaskEdit = (id) => {
+    if (!editingSubTaskTitle.trim()) return;
+    setSubTasks(prev => prev.map(s =>
+      s.id === id ? { ...s, title: editingSubTaskTitle.trim() } : s
+    ));
+    setEditingSubTaskId(null);
+    setEditingSubTaskTitle('');
+  };
+
+  const handleCancelSubTaskEdit = () => {
+    setEditingSubTaskId(null);
+    setEditingSubTaskTitle('');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
+    // Auto-commit any text still in the sub-task input
+    let finalSubTasks = subTasks;
+    if (newSubTaskTitle.trim()) {
+      finalSubTasks = [...subTasks, { id: `sub-${Date.now()}`, title: newSubTaskTitle.trim(), completed: false }];
+      setNewSubTaskTitle('');
+    }
+
     if (!editingTask && track === 'INSTITUTE' && enrollAllLevels) {
       // Capture user-typed subtasks to append into each Bloom level
-      const userSubTasks = subTasks;
+      const userSubTasks = finalSubTasks;
       const baseTitle = title.trim();
       const baseDesc = description.trim();
 
@@ -212,7 +240,7 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
         painRating: Number(painRating),
         priority,
         status: editingTask ? editingTask.status : 'TODO',
-        subTasks: subTasks,
+        subTasks: finalSubTasks,
         reflections: editingTask ? editingTask.reflections || [] : [],
         createdAt: editingTask ? editingTask.createdAt : new Date().toISOString()
       });
@@ -422,16 +450,58 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
 
             {subTasks.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(0, 0, 0, 0.2)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
-                {subTasks.map((sub) => (
-                  <div key={sub.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem', background: 'rgba(255, 255, 255, 0.03)', padding: '6px 10px', borderRadius: '4px' }}>
-                    <span className="preserve-newlines">{sub.title}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemoveSubTask(sub.id)}
-                      style={{ background: 'transparent', border: 'none', color: '#f43f5e', cursor: 'pointer', padding: '2px' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                {subTasks.map((sub, idx) => (
+                  <div key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', background: 'rgba(255, 255, 255, 0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                    <span style={{ color: 'var(--text-subtle)', minWidth: '18px', fontSize: '0.75rem', fontWeight: '700' }}>{idx + 1}.</span>
+
+                    {editingSubTaskId === sub.id ? (
+                      // ── Inline edit mode ──
+                      <>
+                        <input
+                          type="text"
+                          value={editingSubTaskTitle}
+                          onChange={e => setEditingSubTaskTitle(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') { e.preventDefault(); handleSaveSubTaskEdit(sub.id); }
+                            if (e.key === 'Escape') handleCancelSubTaskEdit();
+                          }}
+                          autoFocus
+                          className="form-input"
+                          style={{ flex: 1, padding: '3px 8px', fontSize: '0.82rem' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveSubTaskEdit(sub.id)}
+                          style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.4)', color: '#6ee7b7', borderRadius: '4px', padding: '2px 8px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '600' }}
+                        >✓ Save</button>
+                        <button
+                          type="button"
+                          onClick={handleCancelSubTaskEdit}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-subtle)', cursor: 'pointer', padding: '2px 4px', fontSize: '0.78rem' }}
+                        >✕</button>
+                      </>
+                    ) : (
+                      // ── Display mode ──
+                      <>
+                        <span className="preserve-newlines" style={{ flex: 1 }}>{sub.title}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditSubTask(sub)}
+                          title="Edit sub-task"
+                          style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', padding: '2px 4px' }}
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSubTask(sub.id)}
+                          title="Delete sub-task"
+                          style={{ background: 'transparent', border: 'none', color: '#f43f5e', cursor: 'pointer', padding: '2px' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
