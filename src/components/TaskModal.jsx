@@ -84,6 +84,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
     if (!title.trim()) return;
 
     if (!editingTask && track === 'INSTITUTE' && enrollAllLevels) {
+      // Capture user-typed subtasks to append into each Bloom level
+      const userSubTasks = subTasks;
       const baseTitle = title.trim();
       const baseDesc = description.trim();
 
@@ -100,7 +102,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-1a`, title: 'Review lecture notes & syntax rules', completed: false },
-            { id: `sub-${Date.now()}-1b`, title: 'Memorize core annotations & HTTP status codes', completed: false }
+            { id: `sub-${Date.now()}-1b`, title: 'Memorize core annotations & HTTP status codes', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L1-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date(Date.now() - 5000).toISOString()
@@ -117,7 +120,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-2a`, title: 'Sketch component execution / request flow diagram', completed: false },
-            { id: `sub-${Date.now()}-2b`, title: 'Summarize core OOP / JVM concepts in notes', completed: false }
+            { id: `sub-${Date.now()}-2b`, title: 'Summarize core OOP / JVM concepts in notes', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L2-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date(Date.now() - 4000).toISOString()
@@ -134,7 +138,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-3a`, title: 'Write Java / Spring Boot / React code implementation', completed: false },
-            { id: `sub-${Date.now()}-3b`, title: 'Execute & test API endpoint with Postman', completed: false }
+            { id: `sub-${Date.now()}-3b`, title: 'Execute & test API endpoint with Postman', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L3-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date(Date.now() - 3000).toISOString()
@@ -151,7 +156,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-4a`, title: 'Inspect stack trace & resolve edge cases / null errors', completed: false },
-            { id: `sub-${Date.now()}-4b`, title: 'Profile SQL query execution & performance', completed: false }
+            { id: `sub-${Date.now()}-4b`, title: 'Profile SQL query execution & performance', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L4-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date(Date.now() - 2000).toISOString()
@@ -168,7 +174,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-5a`, title: 'Review code against SOLID principles & clean code rules', completed: false },
-            { id: `sub-${Date.now()}-5b`, title: 'Benchmark security & data validation', completed: false }
+            { id: `sub-${Date.now()}-5b`, title: 'Benchmark security & data validation', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L5-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date(Date.now() - 1000).toISOString()
@@ -185,7 +192,8 @@ export default function TaskModal({ isOpen, onClose, onSaveTask, onSaveMultiLeve
           status: 'TODO',
           subTasks: [
             { id: `sub-${Date.now()}-6a`, title: 'Architect full-stack feature component & microservice API', completed: false },
-            { id: `sub-${Date.now()}-6b`, title: 'Publish project repository to GitHub', completed: false }
+            { id: `sub-${Date.now()}-6b`, title: 'Publish project repository to GitHub', completed: false },
+            ...userSubTasks.map((s, i) => ({ ...s, id: `sub-L6-${Date.now()}-${i}`, completed: false }))
           ],
           reflections: [],
           createdAt: new Date().toISOString()
